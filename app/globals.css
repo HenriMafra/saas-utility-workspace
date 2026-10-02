@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 255 255 255;
+  --fg: 18 22 32;
+  /* neutral-600 — garante contraste AA (>= 4.5:1) para texto secundário sobre bg/surface */
+  --muted: 90 101 119;
+  --surface: 247 248 250;
+  --border: 226 230 238;
+}
+
+.dark {
+  --bg: 12 15 22;
+  --fg: 238 240 244;
+  --muted: 154 166 184;
+  --surface: 24 29 40;
+  --border: 34 42 57;
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid theme("colors.brand.500");
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

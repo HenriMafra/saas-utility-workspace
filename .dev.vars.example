@@ -1,0 +1,18 @@
+# Secrets para o preview local do Cloudflare (npm run cf:preview).
+# Copie para `.dev.vars` (git-ignored) e preencha. NÃO commitar valores reais.
+# Em produção, use: npx wrangler secret put <NOME>
+NEXT_PUBLIC_SUPABASE_URL="https://SEU-PROJ.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY=""
+SUPABASE_SERVICE_ROLE_KEY=""
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
+STRIPE_PRICE_PRO_MONTH=""
+STRIPE_PRICE_PRO_YEAR=""
+STRIPE_PRICE_BUSINESS_MONTH=""
+STRIPE_PRICE_BUSINESS_YEAR=""
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=""
+TURNSTILE_SECRET_KEY=""
+RESEND_API_KEY=""
+EMAIL_FROM="Praticca <ola@praticca.com.br>"
+AI_PROVIDER_API_KEY=""

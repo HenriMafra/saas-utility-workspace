@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "praticca",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Bindings (KV/R2/secrets) podem ser adicionados aqui conforme necessário.
+  // Os secrets (STRIPE_SECRET_KEY etc.) devem ser definidos via `wrangler secret put`
+  // ou no painel Cloudflare Pages/Workers — nunca commitados.
+}
