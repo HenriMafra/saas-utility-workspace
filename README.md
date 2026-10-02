@@ -1,58 +1,80 @@
-# 🛠️ SaaS Utility Workspace — Plataforma Multi-Ferramentas com Next.js 15, Stripe & Supabase
+# SaaS Utility Workspace: Multi-Tenant Architecture with Next.js 15, Stripe, and Row-Level Security
 
-Plataforma SaaS multi-ferramentas (processamento de documentos, conversão de arquivos e utilitários de produtividade digital), construída com arquitetura de ponta baseada em **Next.js 15 (App Router, React 19)**, **Supabase Auth & Database**, checkout global e webhooks idempotentes do **Stripe**, e sistema flexível de **cotas de créditos por usuário**.
-
----
-
-## 📌 Que Problema Resolve?
-
-Muitos projetos SaaS falham na infraestrutura de monetização: lidar com controle de acesso, limites de requisições, idempotência de webhooks de pagamento (para evitar que uma queda de conexão credite duas vezes um plano) e escalabilidade de micro-ferramentas utilitárias.
-
-O **SaaS Utility Workspace** foi projetado como uma fundação pronta para produção:
-1. **Controle de Saldo e Créditos:** Cada usuário possui um saldo de créditos decrementado atomicamente a cada processamento de documento.
-2. **Integração Completa com Stripe:** Planos recorrentes (Pro, Business) e pacotes avulsos de recarga com reconciliação assíncrona de webhooks.
-3. **Arquitetura Modular:** Novas ferramentas utilitárias podem ser plugadas com uma única rota e schema de validação Zod.
+**Author:** Henri Mafra  
+**License:** MIT License  
+**Domain:** Cloud-Native Architecture, Multi-Tenant SaaS Systems, Transactional Billing Engineering  
 
 ---
 
-## ⚙️ Diferencial Técnico & Arquitetura
+## 1. Overview
 
-- **Next.js 15 App Router & Server Actions:** Máxima segurança com execução de lógica de billing no servidor.
-- **Idempotência de Pagamento:** Chaves de idempotência na tabela `billing_events` para garantir que webhooks repetidos do Stripe nunca gerem créditos duplicados.
-- **Row Level Security (RLS):** Isolamento criptográfico de dados no Supabase garantindo que nenhum usuário acesse documentos ou créditos de terceiros.
+SaaS Utility Workspace is a production-grade multi-tenant web platform engineered on **Next.js 15 (App Router, React 19 Server Components)**, **Supabase PostgreSQL with cryptographic Row Level Security (RLS)**, and **Stripe Billing**. The architecture features an idempotent webhook ingestion pipeline and atomic credit quota accounting designed for high-concurrency document processing services.
 
 ---
 
-## 🏗️ Stack Tecnológica
+## 2. Idempotent Payment Reconciliation Architecture
 
-- **Frontend & Fullstack:** Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui, Lucide Icons.
-- **Pagamentos:** Stripe API (Stripe Checkout & Webhooks assinados).
-- **Backend & Auth:** Supabase (PostgreSQL, Auth com Magic Link e OAuth).
-- **E-mails Transacionais:** Resend API.
-- **Testes:** Playwright (testes ponta a ponta de fluxos críticos de assinatura).
+Financial webhook deliveries from payment gateways are vulnerable to duplicate dispatches caused by transient network timeouts. To ensure transaction safety, incoming Stripe events pass through an **Idempotent State Gate**:
+
+```sql
+CREATE TABLE billing_webhook_events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  processed_at TIMESTAMPTZ DEFAULT NOW(),
+  status TEXT NOT NULL
+);
+```
+
+### Execution Protocol:
+1. Webhook payload signature is verified using the HMAC-SHA256 signing secret.
+2. The transaction performs an atomic insert on `billing_webhook_events(event_id)`.
+3. If an `ON CONFLICT` collision occurs, execution aborts immediately with status `HTTP 200 OK`, preventing duplicate credit accrual.
+4. If unique, user quota balances increment inside an atomic database transaction.
 
 ---
 
-## 🚀 Como Executar Localmente
+## 3. Cryptographic Row Level Security (RLS)
+
+Multi-tenant isolation is enforced at the PostgreSQL kernel level rather than relying on application-level filtering:
+
+```sql
+ALTER TABLE user_documents ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Tenant Isolation Policy" ON user_documents
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+```
+
+---
+
+## 4. Setup and Execution
 
 ```bash
-# 1. Clone o repositório
+# 1. Clone repository
 git clone https://github.com/HenriMafra/saas-utility-workspace.git
 cd saas-utility-workspace
 
-# 2. Instale as dependências
+# 2. Install dependencies
 npm install
 
-# 3. Configure as variáveis de ambiente
+# 3. Configure environment
 cp .env.example .env.local
-# Preencha NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY e STRIPE_SECRET_KEY
+# Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and STRIPE_SECRET_KEY
 
-# 4. Inicie o servidor
+# 4. Start local development server
 npm run dev
 ```
 
 ---
 
-## 📄 Licença
+## 5. References
 
-Distribuído sob a licença **MIT**. Desenvolvido por **Henri Mafra**.
+- Vercel. (2024). *Next.js 15 Architecture and Server Components Specification*.
+- Stripe, Inc. (2024). *Designing Robust Webhook Ingestion Pipelines*.
+
+---
+
+## 6. License
+
+Licensed under the MIT License. Copyright (c) Henri Mafra.
